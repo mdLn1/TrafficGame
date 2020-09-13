@@ -1,0 +1,509 @@
+:root {
+  --ming: #16697aff;
+  --pacific-blue: #489fb5ff;
+  --middle-blue: #82c0ccff;
+  --isabelline: #ede7e3ff;
+  --orange-peel: #ffa62bff;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--isabelline);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+button {
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.bg-dark {
+  position: relative;
+  width: 100%;
+  height: 40px;
+  z-index: 2;
+  background: rgb(30, 30, 30);
+  background: linear-gradient(0deg, rgba(30, 30, 30, 0) 0%, rgba(30, 30, 30, 0.72) 30%, rgba(20, 20, 20, 0.9048553210346639) 60%, rgba(0, 0, 0) 100%)
+}
+
+.btn-group {
+  margin: 5px 0px;
+}
+
+.btn-group button:first-child {
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+}
+
+.btn-group button:last-child {
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+
+button {
+  background-color: var(--pacific-blue);
+  border: 1px solid var(--ming);
+  color: white;
+}
+
+.start-btn {
+  color: white;
+  border-radius: 10px;
+  min-width: 120px;
+  width: 150px;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+
+.btn-group button.selected {
+  background-color: var(--isabelline);
+  color: var(--ming)
+}
+
+.btn-group button:not(:last-child) {
+  border-right: none;
+}
+
+.btn-group:after {
+  content: "";
+  clear: both;
+  display: table;
+}
+
+button:hover {
+  background-color: var(--isabelline);
+  color: var(--ming)
+}
+
+.left-end-line {
+  position: absolute;
+  width: 10px;
+  background-color: white;
+  left: 50px;
+  height: 100%;
+  top: 0px;
+}
+
+.right-end-line {
+  background-color: white;
+  width: 10px;
+  right: 50px;
+  height: 100%;
+  top: 0px;
+  position: absolute;
+}
+
+.text-center {
+  text-align: center;
+}
+
+
+.flex-center-container {
+  display: flex;
+  justify-content: center;
+  height: 640px;
+  padding-top: 50px;
+  align-content: space-between;
+}
+
+.centered-container {
+  overflow: hidden;
+  width: 600px;
+  height: 100%;
+  background-color: black;
+  border-left: 3px solid red;
+  border-right: 3px solid red;
+  position: relative;
+}
+
+.picker-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.square-select {
+  height: 50px;
+  width: 50px;
+  overflow: hidden;
+  margin: 5px;
+  border: 5px solid #00cc99;
+  border-radius: 25%;
+  padding: 5px;
+  cursor: pointer;
+}
+
+.square-select.car {
+  width: 60px;
+  height: 100px;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.square-select i {
+  position: absolute;
+  top: 32%;
+  left: 32%;
+  font-size: 1.4rem;
+  color: #00cc99;
+}
+
+.side-container {
+  flex: 2;
+  padding: 0px 10px 10px 10px;
+}
+
+.controlled-car {
+  width: 100px;
+  height: 160px;
+  position: absolute;
+  overflow: visible;
+  margin: 0;
+  z-index: 1;
+}
+
+.uncontrolled-car {
+  width: 100px;
+  height: 160px;
+  position: absolute;
+  overflow: visible;
+  z-index: 1;
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  -o-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+img[alt="car"] {
+  -webkit-transform: rotate(180deg);
+  -moz-transform: rotate(180deg);
+  -ms-transform: rotate(180deg);
+  -o-transform: rotate(180deg);
+  transform: rotate(180deg);
+}
+
+.middle-road-lines {
+  position: relative;
+  left: 50%;
+  animation-duration: 1.5s;
+  animation-timing-function: ease;
+  animation-iteration-count: infinite;
+}
+
+.middle-line {
+  background-color: white;
+  width: 8px;
+  height: 40px;
+  margin: 5px;
+  position: absolute;
+}
+
+.middle-line.zero {
+  top: -160px;
+}
+
+.middle-line.one {
+  top: -80px;
+}
+
+.middle-line.two {
+  top: 0px;
+}
+
+.middle-line.three {
+  top: 80px;
+}
+
+.middle-line.four {
+  top: 160px;
+}
+
+.middle-line.five {
+  top: 240px;
+}
+
+.middle-line.six {
+  top: 320px;
+}
+
+.middle-line.seven {
+  top: 400px;
+}
+
+.middle-line.eight {
+  top: 480px;
+}
+
+.middle-line.nine {
+  top: 560px;
+}
+
+.top-nav {
+  z-index: 1;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  text-align: right;
+}
+
+.top-nav a {
+  text-decoration: none;
+  display: inline-block;
+  border-radius: .5rem;
+  padding: 10px 15px;
+  margin: 0 15px;
+}
+
+a:visited {
+  color: white;
+}
+
+a.active,
+a:hover {
+  color: var(--ming);
+  background-color: var(--isabelline);
+}
+
+.top-svg {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  z-index: -1;
+}
+
+.bottom-svg {
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  z-index: -1;
+}
+
+@keyframes godown {
+  0% {
+    background-color: white;
+    top: 0px;
+  }
+
+  25% {
+    background-color: white;
+    top: 20px;
+  }
+
+
+  50% {
+    background-color: white;
+    top: 40px;
+  }
+
+  75% {
+    background-color: white;
+    top: 60px;
+  }
+
+
+  100% {
+    background-color: white;
+    top: 80px;
+  }
+}
+
+.top-scorers {
+  list-style-type: none;
+  border: 1px solid var(--ming);
+  margin: 0 auto;
+  padding: 0;
+  max-width: 320px;
+  -webkit-transition: 0.3s;
+  transition: 0.3s;
+  z-index: 1;
+}
+
+.top-scorers .header {
+  background-color: var(--pacific-blue);
+  color: white;
+  font-size: 1.8rem;
+}
+
+.top-scorers li {
+  border-bottom: 1px solid var(--pacific-blue);
+  padding: 10px;
+  text-align: center;
+}
+
+li.first {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+li.first i {
+  color: gold;
+}
+
+li.second {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+li.second i {
+  color: silver;
+}
+
+li.third {
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+li.third i {
+  color: #CD7F32;
+}
+
+/* #region Input from https://codepen.io/MichaelArestad/pen/ohLIa */
+
+span.balloon-input-container {
+  position: relative;
+  display: inline-block;
+  margin: 30px 10px;
+}
+
+.balloon {
+  display: inline-block;
+  width: 220px;
+  padding: 10px 0 10px 15px;
+  font-size: 1rem;
+  color: white;
+  background: var(--ming);
+  border: 1px solid var(--ming);
+  border-radius: 3px;
+  outline: 0;
+  text-indent: 70px;
+  transition: all 0.3s ease-in-out;
+}
+
+.balloon::-webkit-input-placeholder {
+  color: white;
+  text-indent: 0;
+}
+
+.balloon+label {
+  display: inline-block;
+  position: absolute;
+  top: 8px;
+  left: 0;
+  bottom: 8px;
+  padding: 5px 15px;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(19, 74, 70, 0);
+  transition: all 0.3s ease-in-out;
+  border-radius: 3px;
+  background: rgba(122, 184, 147, 0);
+}
+
+.balloon+label:after {
+  position: absolute;
+  content: "";
+  width: 0;
+  height: 0;
+  top: 100%;
+  left: 50%;
+  margin-left: -3px;
+  border-left: 3px solid transparent;
+  border-right: 3px solid transparent;
+  border-top: 3px solid rgba(122, 184, 147, 0);
+  transition: all 0.3s ease-in-out;
+}
+
+.balloon:focus,
+.balloon:active {
+  color: var(--ming);
+  text-indent: 0;
+  background: #fff;
+}
+
+.balloon:focus::-webkit-input-placeholder,
+.balloon:active::-webkit-input-placeholder {
+  color: white;
+}
+
+.balloon:focus+label,
+.balloon:active+label {
+  color: white;
+  text-shadow: 0 1px 0 rgba(19, 74, 70, 0.4);
+  background: var(--ming);
+  transform: translateY(-40px);
+}
+
+.balloon:focus+label:after,
+.balloon:active+label:after {
+  border-top: 4px solid var(--pacific-blue);
+}
+
+/* #endregion */
+
+
+/* #region split button https://www.w3schools.com/howto/howto_css_button_split.asp */
+.split-btn {
+  background-color: var(--pacific-blue);
+  font-size: 1.8rem;
+  color: white;
+  padding: 10px;
+  border: none;
+  outline: none;
+}
+
+.dropdown {
+  position: absolute;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: var(--isabelline);
+  min-width: 160px;
+  border: 1px solid var(--ming);
+  z-index: 1;
+}
+
+.dropdown-content span {
+  color: var(--ming);
+  border-bottom: 1px solid var(--middle-blue);
+  background-color: white;
+  padding: 10px;
+  text-decoration: none;
+  display: block;
+  cursor: pointer;
+}
+
+.dropdown-content span:hover {
+  background-color: var(--pacific-blue);
+  color: white;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.split-btn:hover,
+.dropdown:hover .split-btn {
+  background-color: var(--pacific-blue);
+}
+
+/* #endregion */

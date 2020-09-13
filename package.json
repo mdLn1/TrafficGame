@@ -1,0 +1,40 @@
+{
+  "name": "traffic-game",
+  "version": "1.0.0",
+  "description": "a car game",
+  "main": "server.js",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "mongoose": "^5.10.5"
+  },
+  "devDependencies": {
+    "dotenv": "^8.2.0",
+    "nodemon": "^2.0.4"
+  },
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mdLn1/TrafficGame.git"
+  },
+  "keywords": [
+    "js",
+    "react",
+    "css",
+    "html",
+    "cars",
+    "mongodb",
+    "mongo",
+    "express",
+    "react-hooks"
+  ],
+  "author": "Madalin Preda",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mdLn1/TrafficGame/issues"
+  },
+  "homepage": "https://github.com/mdLn1/TrafficGame#readme"
+}
