@@ -55,7 +55,7 @@ button {
   color: white;
 }
 
-.start-btn {
+.btn-start {
   color: white;
   border-radius: 10px;
   min-width: 120px;
@@ -107,6 +107,21 @@ button:hover {
   text-align: center;
 }
 
+.error-message {
+  color: red;
+  padding: 10px 5px;
+}
+
+.lock-username {
+  color: var(--ming);
+  background-color: var(--isabelline);
+  padding: 10px 0px;
+}
+
+.lock-username>span {
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 .flex-center-container {
   display: flex;
@@ -376,7 +391,7 @@ li.third i {
 span.balloon-input-container {
   position: relative;
   display: inline-block;
-  margin: 30px 10px;
+  margin: 30px 10px 15px;
 }
 
 .balloon {

@@ -18,12 +18,16 @@ const MIN_LEFT = 50;
 let keyMap = new Map();
 keyMap.set("ArrowUp", 1);
 keyMap.set("w", 1);
+keyMap.set("W", 1);
 keyMap.set("ArrowDown", 2);
-keyMap.set("s", 1);
+keyMap.set("s", 2);
+keyMap.set("S", 2);
 keyMap.set("ArrowRight", 3);
 keyMap.set("d", 3);
+keyMap.set("D", 3);
 keyMap.set("ArrowLeft", 4);
 keyMap.set("a", 4);
+keyMap.set("A", 4);
 
 const difficultyLevels = ["Easy", "Medium", "Hard"];
 
@@ -46,8 +50,15 @@ const Home = () => {
   const [gameStarted, toggleGameStart] = useState(false);
   const [score, setScore] = useState(0);
   const [enemyCars, setEnemyCars] = useState([]);
+  const [keyboardInputEnabled, toggleKeyboardInput] = useState(false);
+
+  const [username, setUsername] = useState("");
+  const [usernameError, showUsernameError] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordError, showPasswordError] = useState(false);
 
   const [isCarPickerOn, toggleCarPicker] = useState(true);
+  const [enableUsernameLock, toggleLockUsername] = useState(false);
 
   const [enemyCarMaxSpeed, increaseEnemyMaxCarSpeed] = useState(MAX_SPEED);
   const [gameDifficulty, adjustGameDifficulty] = useState(0);
@@ -64,9 +75,18 @@ const Home = () => {
     ];
     return {
       ...randomCar,
-      x: MIN_LEFT + parseInt(Math.random() * (ROAD_WIDTH - randomCar.width - MIN_LEFT).toFixed(0)),
+      x:
+        MIN_LEFT +
+        parseInt(
+          Math.random() * (ROAD_WIDTH - randomCar.width - MIN_LEFT).toFixed(0)
+        ),
       y: TOP_MAX,
     };
+  }
+
+  // check password matches criteria
+  function isPasswordGoodEnough(password) {
+    return password.length > 4;
   }
 
   // handle user key presses to control the car
@@ -106,30 +126,25 @@ const Home = () => {
       if (previous === currentKey) {
         if (MAX_SPEED > currSpeed) setSpeed(currSpeed + SPEED_INCREASE);
       } else setSpeed(SPEED_START);
-      setPrevious(keyMap.get(event.key));
-      switch (event.key) {
-        case "ArrowUp":
-        case "w":
+      setPrevious(currentKey);
+      switch (currentKey) {
+        case 1:
           goUp();
           break;
-        case "ArrowDown":
-        case "s":
+        case 2:
           goDown();
           break;
-        case "ArrowRight":
-        case "d":
+        case 3:
           goRight();
           break;
-        case "ArrowLeft":
-        case "a":
+        case 4:
           goLeft();
           break;
         default:
           break;
       }
     };
-
-    window.addEventListener("keydown", handler);
+    if (!keyboardInputEnabled) window.addEventListener("keydown", handler);
     return () => {
       window.removeEventListener("keydown", handler);
     };
@@ -141,6 +156,7 @@ const Home = () => {
     previous,
     setPrevious,
     gameStarted,
+    keyboardInputEnabled,
   ]);
 
   // keep the cars coming
@@ -155,7 +171,7 @@ const Home = () => {
             };
           })
         );
-      }, 140);
+      }, 110);
 
     return () => {
       clearInterval(moveUncontrolledCarTrigger);
@@ -169,7 +185,7 @@ const Home = () => {
         if (enemyCars.length === 0) return;
         const firstCar = enemyCars[0];
         const lastCar = enemyCars[enemyCars.length - 1];
-        if (lastCar.y < 0 && lastCar.y < -lastCar.height + GAP) enemyCars.pop();
+        if (lastCar.y < 0 && lastCar.y < -lastCar.height - GAP) enemyCars.pop();
         if (
           firstCar.y + firstCar.height + controlledCar.actualHeight + GAP <
           TOP_MAX
@@ -367,14 +383,66 @@ const Home = () => {
                   className="balloon"
                   id="username"
                   type="text"
+                  onFocus={() => toggleKeyboardInput(true)}
+                  onBlur={() => toggleKeyboardInput(false)}
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      showUsernameError(false);
+                    } else showUsernameError(true);
+                    setUsername(encodeURI(e.target.value));
+                  }}
                   placeholder="Your username"
                 />
                 <label htmlFor="username">Username</label>
               </span>
             </div>
+            {usernameError && (
+              <div className="error-message text-center">
+                Please enter a username
+              </div>
+            )}
+            {username && (
+              <div className="text-center lock-username">
+                <span
+                  onClick={() => {
+                    toggleLockUsername(!enableUsernameLock);
+                  }}
+                >
+                  Lock my username
+                </span>
+                {enableUsernameLock && (
+                  <Fragment>
+                    <div>
+                      <span className="balloon-input-container">
+                        <input
+                          className="balloon"
+                          id="password"
+                          type="password"
+                          onFocus={() => toggleKeyboardInput(true)}
+                          onBlur={() => toggleKeyboardInput(false)}
+                          onChange={(e) => {
+                            if (isPasswordGoodEnough(e.target.value)) {
+                              showPasswordError(false);
+                            } else showPasswordError(true);
+                            setPassword(e.target.value);
+                          }}
+                          placeholder="Your password"
+                        />
+                        <label htmlFor="password">Password</label>
+                      </span>
+                    </div>
+                    {passwordError && (
+                      <div className="error-message text-center">
+                        Password minimum 5 characters
+                      </div>
+                    )}
+                  </Fragment>
+                )}
+              </div>
+            )}
             {gameStarted ? (
               <button
-                className="start-btn"
+                className="btn-start"
                 onClick={() => {
                   startGame();
                 }}
@@ -383,9 +451,14 @@ const Home = () => {
               </button>
             ) : (
               <button
-                className="start-btn"
+                className="btn-start"
                 onClick={() => {
-                  startGame();
+                  if (username) {
+                    showUsernameError(false);
+                    startGame();
+                  } else {
+                    showUsernameError(true);
+                  }
                 }}
               >
                 <i className="far fa-play-circle"></i> Start

@@ -12,9 +12,8 @@ app.use(
 );
 mongoConnect();
 
-app.use("*", (req, res) => {
-  res.json({ message: "hello" });
-});
+app.use("/api/scores", require("./routes/scoresRoute"));
+app.use("/api/users", require("./routes/usersRoute"));
 
 app.use((req, res, next) => {
   res.status(404).json({ errors: "Page not found" });
@@ -24,7 +23,7 @@ app.use((err, req, res, next) => {
   console.log(err);
   res
     .status(err.statusCode ? err.statusCode : 500)
-    .json({ error: err.message });
+    .json({ errors: Array.isArray(err.message) ? err.message : [err.message] });
 });
 
 app.listen(process.env.PORT || 5000, () =>
