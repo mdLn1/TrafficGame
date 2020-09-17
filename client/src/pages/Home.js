@@ -5,6 +5,7 @@ import UncontrolledCar from "../components/UncontrolledCar";
 import ColorSample from "../components/ColorSample";
 import carsArray from "../components/Cars";
 import CarSample from "../components/CarSample";
+import axios from "axios";
 
 const SPEED_START = 2;
 const SPEED_INCREASE = 2;
@@ -29,7 +30,7 @@ keyMap.set("ArrowLeft", 4);
 keyMap.set("a", 4);
 keyMap.set("A", 4);
 
-const difficultyLevels = ["Easy", "Medium", "Hard"];
+const difficultyLevels = ["easy", "medium", "hard"];
 
 const colorValues = ["black", "green", "#996633", "#000099", "#660066"];
 
@@ -48,25 +49,28 @@ const Home = () => {
   const [currSpeed, setSpeed] = useState(SPEED_START);
   const [previous, setPrevious] = useState(0); // up = 1; down = 2; right = 3; left = 4
   const [gameStarted, toggleGameStart] = useState(false);
+  const [gameOver, toggleGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [enemyCars, setEnemyCars] = useState([]);
   const [keyboardInputEnabled, toggleKeyboardInput] = useState(false);
 
   const [username, setUsername] = useState("");
-  const [usernameError, showUsernameError] = useState(false);
+  const [usernameError, setUsernameError] = useState("");
+  const [passwordRequired, togglePasswordRequired] = useState(false);
   const [password, setPassword] = useState("");
-  const [passwordError, showPasswordError] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
 
   const [isCarPickerOn, toggleCarPicker] = useState(true);
   const [enableUsernameLock, toggleLockUsername] = useState(false);
 
   const [enemyCarMaxSpeed, increaseEnemyMaxCarSpeed] = useState(MAX_SPEED);
-  const [gameDifficulty, adjustGameDifficulty] = useState(0);
+  const [gameDifficulty, adjustGameDifficulty] = useState(1);
   const [chosenTopDifficultyLevel, changeChosenTopDifficultyLevel] = useState(
     0
   );
   const [selectedColorPosition, setSelectedColorPosition] = useState(0);
   const [selectedCarPosition, setSelectedCarPosition] = useState(0);
+  const [topScoresData, setTopScoresData] = useState(null);
 
   // generate a random car on the screen
   function getRandomCar() {
@@ -84,10 +88,61 @@ const Home = () => {
     };
   }
 
-  // check password matches criteria
-  function isPasswordGoodEnough(password) {
-    return password.length > 4;
+  //check username satisfies conditions
+  function checkUsername(val) {
+    if (!Boolean(val)) {
+      setUsernameError("Username field must be filled in");
+    } else if (val.length > 19) {
+      setUsernameError("Username must be max 20 characters long");
+    } else {
+      setUsernameError("");
+      setUsername(val);
+      axios
+        .get(`/api/users/verify-username/?username=${val}`)
+        .then(() => {
+          togglePasswordRequired(false);
+          setUsernameError("");
+        })
+        .catch((err) => {
+          if (err?.response?.data?.errorCode === 1) {
+            togglePasswordRequired(true);
+            setUsernameError(
+              "Username locked, password is required before start."
+            );
+          }
+        });
+    }
   }
+
+  // check password matches criteria
+  function checkPassword(val) {
+    if (passwordRequired) {
+      setPasswordError("");
+      setPassword(val);
+    } else {
+      if (val.length < 4) {
+        setPasswordError("A good password must have at least 4 characters");
+      } else if (val.length > 99) {
+        setPasswordError("Password cannot be longer than 100 characters");
+      } else {
+        setPasswordError("");
+        setPassword(val);
+      }
+    }
+  }
+
+  // fetch top scores on page load
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const resp = await axios.get("/api/scores/");
+        setTopScoresData(resp.data.topScores);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchData();
+  }, []);
 
   // handle user key presses to control the car
   useEffect(() => {
@@ -226,14 +281,14 @@ const Home = () => {
   // check for collisions
   useEffect(() => {
     enemyCars.forEach((enemyCar) => {
-      // If one rectangle is on left side of other
+      // If one rectangle is on left side of the other
       if (
         enemyCar.x >= controlledCar.x + controlledCar.width ||
         controlledCar.x >= enemyCar.x + enemyCar.width
       )
         return;
 
-      // If one rectangle is above other
+      // If one rectangle is above the other
       if (
         enemyCar.y + enemyCar.height <= controlledCar.y ||
         controlledCar.y + controlledCar.height <= enemyCar.y
@@ -241,20 +296,68 @@ const Home = () => {
         return;
 
       toggleGameStart(false);
+      toggleGameOver(true);
     });
   }, [controlledCar, enemyCars]);
 
+  useEffect(() => {
+    if (gameOver) {
+      const difficultyScores =
+        topScoresData[difficultyLevels[gameDifficulty - 1]];
+      const handleScore = async (data, scores) => {
+        try {
+          await axios.post("/api/scores", {
+            ...data,
+          });
+          if (score > scores[scores.length - 1].score) {
+            const resp = await axios.get("/api/scores");
+            setTopScoresData(resp.data.topScores);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      handleScore(
+        {
+          username,
+          password: password ? password : "",
+          score,
+          difficulty: gameDifficulty,
+        },
+        difficultyScores
+      );
+      toggleGameOver(false);
+    }
+  }, [gameOver]);
+
   // start/stop a game
-  function startGame() {
-    if (gameDifficulty === 0) {
+  async function startGame() {
+    if (passwordRequired && password.length) {
+      try {
+        await axios.post("/api/users/login", {
+          username,
+          password,
+        });
+      } catch (error) {
+        setPasswordError("Invalid attempt to unlock username");
+        return;
+      }
+    } else if (passwordRequired) {
+      setPasswordError(
+        "You must type in a password to play with this username"
+      );
+      return;
+    }
+    if (gameDifficulty === 1) {
       increaseEnemyMaxCarSpeed(MAX_SPEED);
-    } else if (gameDifficulty === 1) {
+    } else if (gameDifficulty === 2) {
       increaseEnemyMaxCarSpeed(MAX_SPEED + 4);
     } else {
       increaseEnemyMaxCarSpeed(MAX_SPEED + 8);
     }
     setControlledCar({ ...controlledCar, x: 252, y: 30 });
     setScore(0);
+
     if (gameStarted) {
       toggleGameStart(false);
     } else {
@@ -272,12 +375,13 @@ const Home = () => {
             <li className="header">
               Top 10
               <span className="split-btn">
-                {difficultyLevels[chosenTopDifficultyLevel]}
+                {difficultyLevels[chosenTopDifficultyLevel].toUpperCase()}
               </span>
               <div className="dropdown">
                 <span className="split-btn">
                   <i className="fa fa-caret-down"></i>
                 </span>
+
                 <div className="dropdown-content">
                   <span
                     onClick={() => {
@@ -303,33 +407,68 @@ const Home = () => {
                 </div>
               </div>
             </li>
-            {[...Array(10).keys()].map((el, index) => {
-              switch (index) {
-                case 0:
-                  return (
-                    <li key={index} className="first">
-                      <i className="fas fa-trophy"></i>
-                      {index}
-                    </li>
-                  );
-                case 1:
-                  return (
-                    <li key={index} className="second">
-                      <i className="fas fa-trophy"></i>
-                      {index}
-                    </li>
-                  );
-                case 2:
-                  return (
-                    <li key={index} className="third">
-                      <i className="fas fa-trophy"></i>
-                      {index}
-                    </li>
-                  );
-                default:
-                  return <li key={index}>{index}</li>;
-              }
-            })}
+            {topScoresData
+              ? topScoresData[difficultyLevels[chosenTopDifficultyLevel]].map(
+                  (el, index) => {
+                    switch (index) {
+                      case 0:
+                        return (
+                          <li key={index} className="first">
+                            <i className="fas fa-trophy"></i>
+                            {" " + decodeURI(el.username) + " " + el.score}
+                          </li>
+                        );
+                      case 1:
+                        return (
+                          <li key={index} className="second">
+                            <i className="fas fa-trophy"></i>
+                            {" " + decodeURI(el.username) + " " + el.score}
+                          </li>
+                        );
+                      case 2:
+                        return (
+                          <li key={index} className="third">
+                            <i className="fas fa-trophy"></i>
+                            {" " + decodeURI(el.username) + " " + el.score}
+                          </li>
+                        );
+                      default:
+                        return (
+                          <li key={index}>
+                            {index + 1}.{" "}
+                            {decodeURI(el.username) + " " + el.score}
+                          </li>
+                        );
+                    }
+                  }
+                )
+              : [...Array(10).keys()].map((el, index) => {
+                  switch (index) {
+                    case 0:
+                      return (
+                        <li key={index} className="first">
+                          <i className="fas fa-trophy"></i>
+                          {index}
+                        </li>
+                      );
+                    case 1:
+                      return (
+                        <li key={index} className="second">
+                          <i className="fas fa-trophy"></i>
+                          {index}
+                        </li>
+                      );
+                    case 2:
+                      return (
+                        <li key={index} className="third">
+                          <i className="fas fa-trophy"></i>
+                          {index}
+                        </li>
+                      );
+                    default:
+                      return <li key={index}>{index}</li>;
+                  }
+                })}
           </ul>
         </div>
 
@@ -351,95 +490,95 @@ const Home = () => {
         <div className="side-container">
           <div className="text-center">
             <h2>Score: {score}</h2>
-            <div className="btn-group">
-              <button
-                onClick={() => {
-                  adjustGameDifficulty(0);
-                }}
-                className={`${gameDifficulty === 0 && "selected"}`}
-              >
-                Easy
-              </button>
-              <button
-                onClick={() => {
-                  adjustGameDifficulty(1);
-                }}
-                className={`${gameDifficulty === 1 && "selected"}`}
-              >
-                Medium
-              </button>
-              <button
-                onClick={() => {
-                  adjustGameDifficulty(2);
-                }}
-                className={`${gameDifficulty === 2 && "selected"}`}
-              >
-                Hard
-              </button>
-            </div>
-            <div>
-              <span className="balloon-input-container">
-                <input
-                  className="balloon"
-                  id="username"
-                  type="text"
-                  onFocus={() => toggleKeyboardInput(true)}
-                  onBlur={() => toggleKeyboardInput(false)}
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      showUsernameError(false);
-                    } else showUsernameError(true);
-                    setUsername(encodeURI(e.target.value));
-                  }}
-                  placeholder="Your username"
-                />
-                <label htmlFor="username">Username</label>
-              </span>
-            </div>
-            {usernameError && (
-              <div className="error-message text-center">
-                Please enter a username
-              </div>
-            )}
-            {username && (
-              <div className="text-center lock-username">
-                <span
-                  onClick={() => {
-                    toggleLockUsername(!enableUsernameLock);
-                  }}
-                >
-                  Lock my username
-                </span>
-                {enableUsernameLock && (
-                  <Fragment>
-                    <div>
-                      <span className="balloon-input-container">
-                        <input
-                          className="balloon"
-                          id="password"
-                          type="password"
-                          onFocus={() => toggleKeyboardInput(true)}
-                          onBlur={() => toggleKeyboardInput(false)}
-                          onChange={(e) => {
-                            if (isPasswordGoodEnough(e.target.value)) {
-                              showPasswordError(false);
-                            } else showPasswordError(true);
-                            setPassword(e.target.value);
-                          }}
-                          placeholder="Your password"
-                        />
-                        <label htmlFor="password">Password</label>
-                      </span>
-                    </div>
-                    {passwordError && (
-                      <div className="error-message text-center">
-                        Password minimum 5 characters
-                      </div>
-                    )}
-                  </Fragment>
+            {!gameStarted && (
+              <Fragment>
+                <div className="btn-group">
+                  <button
+                    onClick={() => {
+                      adjustGameDifficulty(1);
+                    }}
+                    className={`${gameDifficulty === 1 && "selected"}`}
+                  >
+                    Easy
+                  </button>
+                  <button
+                    onClick={() => {
+                      adjustGameDifficulty(2);
+                    }}
+                    className={`${gameDifficulty === 2 && "selected"}`}
+                  >
+                    Medium
+                  </button>
+                  <button
+                    onClick={() => {
+                      adjustGameDifficulty(3);
+                    }}
+                    className={`${gameDifficulty === 3 && "selected"}`}
+                  >
+                    Hard
+                  </button>
+                </div>
+
+                <div>
+                  <span className="balloon-input-container">
+                    <input
+                      className="balloon"
+                      id="username"
+                      type="text"
+                      onFocus={() => toggleKeyboardInput(true)}
+                      onBlur={() => toggleKeyboardInput(false)}
+                      onChange={(e) => {
+                        checkUsername(e.target.value);
+                      }}
+                      placeholder="Your username"
+                    />
+                    <label htmlFor="username">Username</label>
+                  </span>
+                </div>
+                {usernameError && (
+                  <div className="error-message text-center">
+                    {usernameError}
+                  </div>
                 )}
-              </div>
+                <div className="text-center lock-username">
+                  {!passwordRequired && !usernameError && (
+                    <span
+                      onClick={() => {
+                        toggleLockUsername(!enableUsernameLock);
+                      }}
+                    >
+                      Lock my username
+                    </span>
+                  )}
+                  {(passwordRequired || enableUsernameLock) && (
+                    <Fragment>
+                      <div>
+                        <span className="balloon-input-container">
+                          <input
+                            className="balloon"
+                            id="password"
+                            type="password"
+                            onFocus={() => toggleKeyboardInput(true)}
+                            onBlur={() => toggleKeyboardInput(false)}
+                            onChange={(e) => {
+                              checkPassword(e.target.value);
+                            }}
+                            placeholder="Your password"
+                          />
+                          <label htmlFor="password">Password</label>
+                        </span>
+                      </div>
+                      {passwordError && (
+                        <div className="error-message text-center">
+                          {passwordError}
+                        </div>
+                      )}
+                    </Fragment>
+                  )}
+                </div>
+              </Fragment>
             )}
+
             {gameStarted ? (
               <button
                 className="btn-start"
@@ -453,11 +592,19 @@ const Home = () => {
               <button
                 className="btn-start"
                 onClick={() => {
-                  if (username) {
-                    showUsernameError(false);
-                    startGame();
+                  if (!Boolean(username)) {
+                    setUsernameError("Username field must be filled in");
+                  } else if (username.length > 19) {
+                    setUsernameError("Username must be max 20 characters long");
                   } else {
-                    showUsernameError(true);
+                    if (passwordRequired && !password) {
+                      setUsernameError(
+                        "Username locked, password is required before start."
+                      );
+                      return;
+                    }
+                    setUsernameError("");
+                    startGame();
                   }
                 }}
               >

@@ -56,7 +56,7 @@ router.post(
   "/login",
   [
     check("username", "Invalid username").trim().isLength({ min: 1, max: 20 }),
-    check("password", "Invalid password").trim().isLength({ min: 5, max: 100 }),
+    check("password", "Invalid password").trim().isLength({ min: 1, max: 100 }),
     errorChecker,
   ],
   exceptionHandler(authorizeUser)

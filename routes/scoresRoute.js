@@ -18,6 +18,7 @@ router.post(
       .trim()
       .isLength({ min: 1, max: 20 }),
     check("score", "Score must be a positive number").isInt(),
+    check("difficulty", "Game difficulty must be an integer").isInt(),
     errorChecker,
   ],
   exceptionHandler(saveScore)

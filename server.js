@@ -21,9 +21,10 @@ app.use((req, res, next) => {
 
 app.use((err, req, res, next) => {
   console.log(err);
-  res
-    .status(err.statusCode ? err.statusCode : 500)
-    .json({ errors: Array.isArray(err.message) ? err.message : [err.message] });
+  res.status(err.statusCode ? err.statusCode : 500).json({
+    errors: Array.isArray(err.message) ? err.message : [err.message],
+    errorCode: err.errorCode ? err.errorCode : 0,
+  });
 });
 
 app.listen(process.env.PORT || 5000, () =>

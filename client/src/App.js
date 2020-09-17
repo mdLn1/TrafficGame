@@ -6,6 +6,11 @@ import {
   NavLink,
 } from "react-router-dom";
 import Home from "./pages/Home";
+import About from "./pages/About";
+import axios from "axios";
+
+axios.defaults.baseURL = "http://localhost:5000/";
+axios.defaults.headers.post["Content-Type"] = "application/json";
 
 const App = () => {
   return (
@@ -24,7 +29,9 @@ const App = () => {
           ></path>
         </svg>
         <div className="top-nav">
-          <NavLink exact to="/">Home</NavLink>
+          <NavLink exact to="/">
+            Home
+          </NavLink>
           <NavLink to="/about">About</NavLink>
         </div>
         <svg
@@ -40,7 +47,7 @@ const App = () => {
         </svg>
         <Switch>
           <Route exact path="/" component={Home} />
-          <Route path="/about" render={() => <div>Hello</div>} />
+          <Route path="/about" component={About} />
         </Switch>
       </div>
     </Router>
