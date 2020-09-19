@@ -26,6 +26,10 @@ button {
   cursor: pointer;
 }
 
+button:focus {
+  outline: none;
+}
+
 .bg-dark {
   position: relative;
   width: 100%;
@@ -279,6 +283,7 @@ img[alt="car"] {
   border-radius: .5rem;
   padding: 10px 15px;
   margin: 0 15px;
+  color: white;
 }
 
 a:visited {
@@ -386,12 +391,85 @@ li.third i {
   color: #CD7F32;
 }
 
+.crash {
+  position: absolute;
+  z-index: 3;
+  top: 60%;
+  left: 60%;
+  width: 300px;
+  height: 280px;
+  margin: -260px 0 0 -210px;
+  animation-name: crash-scale;
+  animation-duration: 2s;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+@keyframes crash-scale {
+  0% {
+    width: 300px;
+    height: 280px;
+    top: 60%;
+    left: 60%;
+  }
+
+  40% {
+    width: 400px;
+    height: 370px;
+    top: 54%;
+    left: 54%;
+  }
+
+  50% {
+    width: 360px;
+    height: 335px;
+    top: 57%;
+    left: 57%;
+  }
+
+  60% {
+    width: 400px;
+    height: 370px;
+    top: 54%;
+    left: 54%;
+  }
+
+  70% {
+    width: 360px;
+    height: 335px;
+    top: 57%;
+    left: 57%;
+  }
+
+  80% {
+    width: 400px;
+    height: 370px;
+    top: 54%;
+    left: 54%;
+  }
+
+  90% {
+    width: 360px;
+    height: 335px;
+    top: 57%;
+    left: 57%;
+  }
+
+  100% {
+    width: 400px;
+    height: 370px;
+    top: 54%;
+    left: 54%;
+  }
+}
+
 /* #region Input from https://codepen.io/MichaelArestad/pen/ohLIa */
 
 span.balloon-input-container {
   position: relative;
   display: inline-block;
   margin: 30px 10px 15px;
+  white-space: nowrap;
 }
 
 .balloon {
@@ -410,7 +488,6 @@ span.balloon-input-container {
 
 .balloon::-webkit-input-placeholder {
   color: white;
-  text-indent: 0;
 }
 
 .balloon+label {
@@ -453,7 +530,7 @@ span.balloon-input-container {
 
 .balloon:focus::-webkit-input-placeholder,
 .balloon:active::-webkit-input-placeholder {
-  color: white;
+  color: var(--ming);
 }
 
 .balloon:focus+label,

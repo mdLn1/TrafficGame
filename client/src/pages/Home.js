@@ -5,6 +5,7 @@ import UncontrolledCar from "../components/UncontrolledCar";
 import ColorSample from "../components/ColorSample";
 import carsArray from "../components/Cars";
 import CarSample from "../components/CarSample";
+import crash from "../components/images/crash.png";
 import axios from "axios";
 
 const SPEED_START = 2;
@@ -53,6 +54,7 @@ const Home = () => {
   const [score, setScore] = useState(0);
   const [enemyCars, setEnemyCars] = useState([]);
   const [keyboardInputEnabled, toggleKeyboardInput] = useState(false);
+  const [lastVerified, setLastVerified] = useState(new Date().toUTCString());
 
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState("");
@@ -120,8 +122,8 @@ const Home = () => {
       setPasswordError("");
       setPassword(val);
     } else {
-      if (val.length < 4) {
-        setPasswordError("A good password must have at least 4 characters");
+      if (val.length < 5) {
+        setPasswordError("A good password must have at least 5 characters");
       } else if (val.length > 99) {
         setPasswordError("Password cannot be longer than 100 characters");
       } else {
@@ -216,7 +218,7 @@ const Home = () => {
 
   // keep the cars coming
   useEffect(() => {
-    if (gameStarted)
+    if (gameStarted) {
       moveUncontrolledCarTrigger = setInterval(() => {
         setEnemyCars(
           enemyCars.map((enemyCar) => {
@@ -227,6 +229,7 @@ const Home = () => {
           })
         );
       }, 110);
+    }
 
     return () => {
       clearInterval(moveUncontrolledCarTrigger);
@@ -281,6 +284,7 @@ const Home = () => {
   // check for collisions
   useEffect(() => {
     enemyCars.forEach((enemyCar) => {
+      setLastVerified(new Date().toUTCString());
       // If one rectangle is on left side of the other
       if (
         enemyCar.x >= controlledCar.x + controlledCar.width ||
@@ -323,10 +327,10 @@ const Home = () => {
           password: password ? password : "",
           score,
           difficulty: gameDifficulty,
+          lastVerified,
         },
         difficultyScores
       );
-      toggleGameOver(false);
     }
   }, [gameOver]);
 
@@ -347,6 +351,19 @@ const Home = () => {
         "You must type in a password to play with this username"
       );
       return;
+    }
+    if (enableUsernameLock) {
+      try {
+        await axios.post("/api/users", {
+          username,
+          password,
+        });
+        toggleLockUsername(false);
+        togglePasswordRequired(true);
+      } catch (error) {
+        console.log(error?.response?.data?.errors);
+        return;
+      }
     }
     if (gameDifficulty === 1) {
       increaseEnemyMaxCarSpeed(MAX_SPEED);
@@ -476,6 +493,7 @@ const Home = () => {
           className="centered-container"
           style={{ backgroundColor: colorValues[selectedColorPosition] }}
         >
+          {gameOver && <img className="crash" src={crash}></img>}
           <div className="bg-dark"></div>
           <div className="left-end-line" />
           {enemyCars.map((el, index) => (
@@ -489,6 +507,7 @@ const Home = () => {
 
         <div className="side-container">
           <div className="text-center">
+            {gameStarted && <h1>{username}</h1>}
             <h2>Score: {score}</h2>
             {!gameStarted && (
               <Fragment>
@@ -525,6 +544,7 @@ const Home = () => {
                       className="balloon"
                       id="username"
                       type="text"
+                      defaultValue={username}
                       onFocus={() => toggleKeyboardInput(true)}
                       onBlur={() => toggleKeyboardInput(false)}
                       onChange={(e) => {
@@ -560,6 +580,7 @@ const Home = () => {
                             type="password"
                             onFocus={() => toggleKeyboardInput(true)}
                             onBlur={() => toggleKeyboardInput(false)}
+                            defaultValue={password}
                             onChange={(e) => {
                               checkPassword(e.target.value);
                             }}
@@ -603,6 +624,7 @@ const Home = () => {
                       );
                       return;
                     }
+                    toggleGameOver(false);
                     setUsernameError("");
                     startGame();
                   }

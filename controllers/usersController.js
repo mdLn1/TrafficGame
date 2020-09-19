@@ -7,7 +7,7 @@ async function createUser(req, res) {
   const user = await User.findOne({ username });
   if (user)
     throw new HttpError(
-      "Username locked already, you will need to provide a password",
+      "This username is already registered",
       400,
       1
     );

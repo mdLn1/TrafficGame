@@ -3,17 +3,37 @@ const mongoConnect = require("./utils/mongoConnect");
 const CLIENT_ORIGIN = ["http://127.0.0.1:3000", "http://localhost:3000"];
 const cors = require("cors");
 const app = express();
-app.use(express.json({ extended: true }));
+const compression = require("compression");
+const helmet = require("helmet");
+const path = require("path");
 
 app.use(
   cors({
     origin: CLIENT_ORIGIN,
   })
 );
+app.use(compression());
+app.use(helmet());
+app.use(express.json({ extended: true }));
+
 mongoConnect();
+
+app.use(function (req, res, next) {
+  res.setHeader(
+    "Content-Security-Policy",
+    "default-src 'self' https: 'unsafe-eval' 'unsafe-inline'; script-src 'self' https://kit.fontawesome.com/6fc748a3b0.js 'unsafe-eval' 'unsafe-inline'; img-src 'self' 'unsafe-inline' 'unsafe-eval';"
+  );
+  return next();
+});
+
+app.use(express.static(path.join(__dirname, "/client/build")));
 
 app.use("/api/scores", require("./routes/scoresRoute"));
 app.use("/api/users", require("./routes/usersRoute"));
+
+app.get("*", function (req, res) {
+  res.sendFile(path.join(__dirname, "/client/build", "index.html"));
+});
 
 app.use((req, res, next) => {
   res.status(404).json({ errors: "Page not found" });

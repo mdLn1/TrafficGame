@@ -4,8 +4,14 @@ const HttpError = require("../utils/httpError");
 const bcrypt = require("bcryptjs");
 
 async function saveScore(req, res) {
-  const { username, password, score, difficulty } = req.body;
+  const { username, password, score, difficulty, lastVerified } = req.body;
   const user = await User.findOne({ username: username });
+  if (
+    !lastVerified ||
+    new Date(lastVerified).getTime() - new Date().getTime() > 15000
+  ) {
+    throw new HttpError("Illegitimate score submission", 400);
+  }
   if (user && !password)
     throw new HttpError(
       "Invalid credentials, this username is locked and the password entered does not match.",
