@@ -20,7 +20,6 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
 button {
   padding: 12px 16px;
   cursor: pointer;
@@ -118,13 +117,20 @@ button:hover {
 
 .lock-username {
   color: var(--ming);
-  background-color: var(--isabelline);
   padding: 10px 0px;
 }
 
 .lock-username>span {
   text-decoration: underline;
   cursor: pointer;
+}
+
+.about-container {
+  margin: 0 auto;
+  padding-top: 50px;
+  width: 70%;
+  max-width: 700px;
+  text-align: justify;
 }
 
 .flex-center-container {
@@ -135,6 +141,7 @@ button:hover {
   align-content: space-between;
 }
 
+
 .centered-container {
   overflow: hidden;
   width: 600px;
@@ -144,6 +151,7 @@ button:hover {
   border-right: 3px solid red;
   position: relative;
 }
+
 
 .picker-container {
   display: flex;
@@ -178,6 +186,7 @@ button:hover {
 }
 
 .side-container {
+  position: relative;
   flex: 2;
   padding: 0px 10px 10px 10px;
 }
@@ -461,6 +470,10 @@ li.third i {
     top: 54%;
     left: 54%;
   }
+}
+
+.about-container a {
+  color: var(--ming);
 }
 
 /* #region Input from https://codepen.io/MichaelArestad/pen/ohLIa */

@@ -8,6 +8,12 @@ const {
   authorizeUser,
   verifyUsernameLocked,
 } = require("../controllers/usersController");
+const rateLimit = require("express-rate-limit");
+const limit = rateLimit({
+  max: 200, // max requests
+  windowMs: 60 * 60 * 1000, // 1 Hour
+  message: "Too many requests", // message to send
+});
 
 //@route POST api/user/
 //@desc Create new user
@@ -54,6 +60,7 @@ router.get(
 //@access Public
 router.post(
   "/login",
+  limit,
   [
     check("username", "Invalid username").trim().isLength({ min: 1, max: 20 }),
     check("password", "Invalid password").trim().isLength({ min: 1, max: 100 }),

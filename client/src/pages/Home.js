@@ -7,6 +7,8 @@ import carsArray from "../components/Cars";
 import CarSample from "../components/CarSample";
 import crash from "../components/images/crash.png";
 import axios from "axios";
+import "loaders.css";
+import Loader from "react-loaders";
 
 const SPEED_START = 2;
 const SPEED_INCREASE = 2;
@@ -55,6 +57,12 @@ const Home = () => {
   const [enemyCars, setEnemyCars] = useState([]);
   const [keyboardInputEnabled, toggleKeyboardInput] = useState(false);
   const [lastVerified, setLastVerified] = useState(new Date().toUTCString());
+  const [loading, setLoading] = useState({
+    scores: false,
+    startGame: false,
+    submitScore: false,
+    verifyUsername: false,
+  });
 
   const [username, setUsername] = useState("");
   const [usernameError, setUsernameError] = useState("");
@@ -99,11 +107,13 @@ const Home = () => {
     } else {
       setUsernameError("");
       setUsername(val);
+      setLoading({ ...loading, verifyUsername: true });
       axios
         .get(`/api/users/verify-username/?username=${val}`)
         .then(() => {
           togglePasswordRequired(false);
           setUsernameError("");
+          setLoading({ ...loading, verifyUsername: false });
         })
         .catch((err) => {
           if (err?.response?.data?.errorCode === 1) {
@@ -112,6 +122,7 @@ const Home = () => {
               "Username locked, password is required before start."
             );
           }
+          setLoading({ ...loading, verifyUsername: false });
         });
     }
   }
@@ -310,6 +321,7 @@ const Home = () => {
         topScoresData[difficultyLevels[gameDifficulty - 1]];
       const handleScore = async (data, scores) => {
         try {
+          setLoading({ ...loading, submitScore: true });
           await axios.post("/api/scores", {
             ...data,
           });
@@ -319,6 +331,8 @@ const Home = () => {
           }
         } catch (error) {
           console.log(error);
+        } finally {
+          setLoading({ ...loading, submitScore: false });
         }
       };
       handleScore(
@@ -336,33 +350,42 @@ const Home = () => {
 
   // start/stop a game
   async function startGame() {
-    if (passwordRequired && password.length) {
-      try {
-        await axios.post("/api/users/login", {
-          username,
-          password,
-        });
-      } catch (error) {
-        setPasswordError("Invalid attempt to unlock username");
+    if (!gameStarted) {
+      if (passwordRequired && password.length) {
+        setLoading({ ...loading, startGame: true });
+        try {
+          await axios.post("/api/users/login", {
+            username,
+            password,
+          });
+          setLoading({ ...loading, startGame: false });
+        } catch (error) {
+          setPasswordError("Invalid attempt to unlock username");
+          setLoading({ ...loading, startGame: false });
+          return;
+        }
+      } else if (passwordRequired) {
+        setPasswordError(
+          "You must type in a password to play with this username"
+        );
+        setLoading({ ...loading, startGame: false });
         return;
       }
-    } else if (passwordRequired) {
-      setPasswordError(
-        "You must type in a password to play with this username"
-      );
-      return;
-    }
-    if (enableUsernameLock) {
-      try {
-        await axios.post("/api/users", {
-          username,
-          password,
-        });
-        toggleLockUsername(false);
-        togglePasswordRequired(true);
-      } catch (error) {
-        console.log(error?.response?.data?.errors);
-        return;
+      if (enableUsernameLock) {
+        setLoading({ ...loading, startGame: true });
+        try {
+          await axios.post("/api/users", {
+            username,
+            password,
+          });
+          toggleLockUsername(false);
+          togglePasswordRequired(true);
+          setLoading({ ...loading, startGame: false });
+        } catch (error) {
+          console.log(error?.response?.data?.errors);
+          setLoading({ ...loading, startGame: false });
+          return;
+        }
       }
     }
     if (gameDifficulty === 1) {
@@ -388,6 +411,20 @@ const Home = () => {
     <Fragment>
       <div className="flex-center-container">
         <div className="side-container">
+          {loading.scores && (
+            <Loader
+              type="ball-spin-fade-loader"
+              color="var(--orange-peel)"
+              active
+              style={{
+                transform: "scale(1.5)",
+                zIndex: 5,
+                position: "absolute",
+                top: "40%",
+                left: "50%",
+              }}
+            />
+          )}
           <ul className="top-scorers">
             <li className="header">
               Top 10
@@ -488,12 +525,13 @@ const Home = () => {
                 })}
           </ul>
         </div>
-
         <div
           className="centered-container"
           style={{ backgroundColor: colorValues[selectedColorPosition] }}
         >
-          {gameOver && <img className="crash" src={crash}></img>}
+          {gameOver && (
+            <img className="crash" src={crash} alt="crash vector"></img>
+          )}
           <div className="bg-dark"></div>
           <div className="left-end-line" />
           {enemyCars.map((el, index) => (
@@ -504,10 +542,14 @@ const Home = () => {
           <MiddleRoadLines gameStarted={gameStarted} />
           <div className="right-end-line" />
         </div>
-
         <div className="side-container">
           <div className="text-center">
             {gameStarted && <h1>{username}</h1>}
+            {gameStarted && (
+              <h2>
+                Difficulty: {difficultyLevels[gameDifficulty - 1].toUpperCase()}
+              </h2>
+            )}
             <h2>Score: {score}</h2>
             {!gameStarted && (
               <Fragment>
@@ -537,7 +579,22 @@ const Home = () => {
                     Hard
                   </button>
                 </div>
-
+                {loading.verifyUsername && (
+                  <div className="text-center" style={{ position: "relative" }}>
+                    <Loader
+                      type="ball-spin-fade-loader"
+                      color="red"
+                      active
+                      style={{
+                        transform: "scale(0.6)",
+                        zIndex: 5,
+                        position: "absolute",
+                        left: "50%",
+                        marginTop: "12px",
+                      }}
+                    />
+                  </div>
+                )}
                 <div>
                   <span className="balloon-input-container">
                     <input
@@ -599,40 +656,64 @@ const Home = () => {
                 </div>
               </Fragment>
             )}
-
-            {gameStarted ? (
-              <button
-                className="btn-start"
-                onClick={() => {
-                  startGame();
-                }}
-              >
-                <i className="far fa-stop-circle"></i> Stop
-              </button>
-            ) : (
-              <button
-                className="btn-start"
-                onClick={() => {
-                  if (!Boolean(username)) {
-                    setUsernameError("Username field must be filled in");
-                  } else if (username.length > 19) {
-                    setUsernameError("Username must be max 20 characters long");
-                  } else {
-                    if (passwordRequired && !password) {
+            <div>
+              {gameStarted ? (
+                <Fragment>
+                  <button
+                    className="btn-start"
+                    onClick={() => {
+                      startGame();
+                    }}
+                  >
+                    <i className="far fa-stop-circle"></i> Stop
+                  </button>
+                  <h3>
+                    Use Arrow Keys or "W, S, A, D" to control the car movements.
+                  </h3>
+                </Fragment>
+              ) : (
+                <button
+                  className="btn-start"
+                  style={{ position: "relative" }}
+                  onClick={() => {
+                    if (!Boolean(username)) {
+                      setUsernameError("Username field must be filled in");
+                    } else if (username.length > 19) {
                       setUsernameError(
-                        "Username locked, password is required before start."
+                        "Username must be max 20 characters long"
                       );
-                      return;
+                    } else {
+                      if (passwordRequired && !password) {
+                        setUsernameError(
+                          "Username locked, password is required before start."
+                        );
+                        return;
+                      }
+                      toggleGameOver(false);
+                      setUsernameError("");
+                      startGame();
                     }
-                    toggleGameOver(false);
-                    setUsernameError("");
-                    startGame();
-                  }
-                }}
-              >
-                <i className="far fa-play-circle"></i> Start
-              </button>
-            )}
+                  }}
+                >
+                  <i className="far fa-play-circle"></i> Start
+                  {loading.startGame && (
+                    <Loader
+                      type="ball-spin-fade-loader"
+                      color="var(--orange-peel)"
+                      active
+                      style={{
+                        transform: "scale(0.7)",
+                        zIndex: 5,
+                        position: "absolute",
+                        right: "0",
+                        marginRight: "-25px",
+                        top: "50%",
+                      }}
+                    />
+                  )}
+                </button>
+              )}
+            </div>
             {!gameStarted && (
               <div>
                 <div className="btn-group">

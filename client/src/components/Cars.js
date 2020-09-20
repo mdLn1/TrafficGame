@@ -69,7 +69,7 @@ export default [
   },
   {
     link: ninth,
-    width: 86,
+    width: 84,
     height: 172,
     actualWidth: 96,
     actualHeight: 182,

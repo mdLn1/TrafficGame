@@ -9,14 +9,13 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import axios from "axios";
 
-axios.defaults.baseURL = "http://localhost:5000/";
+// axios.defaults.baseURL = "http://localhost:8080/";
 axios.defaults.headers.post["Content-Type"] = "application/json";
 
 const App = () => {
   return (
     <Router>
       <div>
-        {/* https://www.getwaves.io  */}
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 1440 320"
