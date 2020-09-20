@@ -31,4 +31,4 @@ Please make sure you configured your MongoDB cluster to accept connections from 
 
 ## Image Gallery
 
-![Desktop screenshot](https://raw.githubusercontent.com/mdLn1/TrafficGame/master/assets/desktop.PNG "web app desktop view")
+![Desktop screenshot](https://raw.githubusercontent.com/mdLn1/TrafficGame/master/assets/desktop.png "web app desktop view")
