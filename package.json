@@ -22,7 +22,8 @@
   },
   "scripts": {
     "dev": "nodemon server.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "cd client/ && npm install && npm run build"
   },
   "repository": {
     "type": "git",
@@ -44,5 +45,8 @@
   "bugs": {
     "url": "https://github.com/mdLn1/TrafficGame/issues"
   },
-  "homepage": "https://github.com/mdLn1/TrafficGame#readme"
+  "homepage": "https://github.com/mdLn1/TrafficGame#readme",
+  "engines": {
+    "node": "12.18.1"
+  }
 }
